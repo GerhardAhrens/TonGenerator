@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TonGenerator", "TonGenerator\TonGenerator.csproj", "{3FD27FF6-1A22-4329-9B35-A497F98FE8DB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3FD27FF6-1A22-4329-9B35-A497F98FE8DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FD27FF6-1A22-4329-9B35-A497F98FE8DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FD27FF6-1A22-4329-9B35-A497F98FE8DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FD27FF6-1A22-4329-9B35-A497F98FE8DB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FFF6150B-7EA1-4FA5-81C1-2AD6B372A61B}
+	EndGlobalSection
+EndGlobal
