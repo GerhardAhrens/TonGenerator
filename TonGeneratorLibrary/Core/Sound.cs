@@ -27,8 +27,11 @@ namespace TonGeneratorLibrary.Core
 
     public sealed class Sound : IDisposable
     {
-        public int soundVolume { get; set; }
-        public SoundPlayer soundPlayer;
+        private const int MMSYSERR_NOERROR = 0;
+        private const int CALLBACK_FUNCTION = 0x00030000;
+        private const int MM_WOM_OPEN = 0x3BB;
+        private const int MM_WOM_CLOSE = 0x3BC;
+        private const int MM_WOM_DONE = 0x3BD;
 
         private static AutoResetEvent playEvent = new AutoResetEvent(false);
         private IntPtr mainWaveOut;
@@ -37,8 +40,9 @@ namespace TonGeneratorLibrary.Core
         private bool soundPlaying;
         private int soundFrequency;
         private Thread thread;
-        public SoundStructure.WaveDelegate bufferProc = new SoundStructure.WaveDelegate(SoundBuffer.WaveOutProc);
-        //private WaveOutAPI.WaveDelegateAPI bufferProc = new WaveOutAPI.WaveDelegateAPI(SoundBuffer.WaveOutProc);
+        private WaveOutAPI.WaveDelegate bufferProc = new WaveOutAPI.WaveDelegate(SoundBuffer.WaveOutProc);
+
+        public SoundPlayer soundPlayer;
 
         public Sound()
         {
@@ -53,6 +57,8 @@ namespace TonGeneratorLibrary.Core
             this.soundFrequency = 440;
         }
 
+        public int soundVolume { get; set; }
+
         public void Dispose()
         {
             this.soundPlaying = false;
@@ -60,8 +66,8 @@ namespace TonGeneratorLibrary.Core
 
         public bool OpenDevice(int samplesPerSecond)
         {
-            SoundStructure.WaveFormat waveFormat = new SoundStructure.WaveFormat();
-            waveFormat.wFormatTag = (short)SoundStructure.WaveFormats.Pcm;
+            WaveFormat waveFormat = new WaveFormat();
+            waveFormat.wFormatTag = (short)WaveFormats.Pcm;
             waveFormat.nChannels = 2;
             waveFormat.wBitsPerSample = 16;
             waveFormat.nSamplesPerSec = samplesPerSecond;
@@ -69,7 +75,7 @@ namespace TonGeneratorLibrary.Core
             waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
             waveFormat.cbSize = 0;
 
-            if (WaveOutAPI.WaveOutOpen(out this.mainWaveOut, 0, waveFormat, this.bufferProc, 0, SoundStructure.CALLBACK_FUNCTION) != SoundStructure.MMSYSERR_NOERROR)
+            if (WaveOutAPI.WaveOutOpen(out this.mainWaveOut, 0, waveFormat, this.bufferProc, 0, CALLBACK_FUNCTION) != MMSYSERR_NOERROR)
             {
                 Debug.WriteLine("Sound card cannot be opened.");
                 return false;
@@ -80,7 +86,7 @@ namespace TonGeneratorLibrary.Core
 
         public bool CloseDevice()
         {
-            if (SoundStructure.waveOutClose(this.mainWaveOut) != SoundStructure.MMSYSERR_NOERROR)
+            if (WaveOutAPI.WaveOutClose(this.mainWaveOut) != MMSYSERR_NOERROR)
             {
                 Debug.WriteLine("Sound card cannot be closed!");
                 return false;
@@ -188,7 +194,7 @@ namespace TonGeneratorLibrary.Core
         internal sealed class SoundBuffer : IDisposable
         {
             private IntPtr hWaveOut;
-            private SoundStructure.WaveHdr waveHeader;
+            private WaveHeader waveHeader;
             private GCHandle headerDataHandle;
             private GCHandle waveHeaderHandle;
             private int Id;
@@ -216,7 +222,7 @@ namespace TonGeneratorLibrary.Core
 
                 try
                 {
-                    SoundStructure.waveOutPrepareHeader(this.hWaveOut, ref waveHeader, Marshal.SizeOf(this.waveHeader));
+                    WaveOutAPI.WaveOutPrepareHeader(this.hWaveOut, ref waveHeader, Marshal.SizeOf(this.waveHeader));
                 }
                 catch
                 {
@@ -228,7 +234,7 @@ namespace TonGeneratorLibrary.Core
             {
                 if (this.waveHeader.lpData != IntPtr.Zero)
                 {
-                    SoundStructure.waveOutUnprepareHeader(hWaveOut, ref this.waveHeader, Marshal.SizeOf(this.waveHeader));
+                    WaveOutAPI.WaveOutUnprepareHeader(hWaveOut, ref this.waveHeader, Marshal.SizeOf(this.waveHeader));
                     this.waveHeaderHandle.Free();
                     this.waveHeader.lpData = IntPtr.Zero;
                 }
@@ -242,9 +248,9 @@ namespace TonGeneratorLibrary.Core
                 GC.SuppressFinalize(this);
             }
 
-            public static void WaveOutProc(IntPtr hdrvr, int uMsg, int dwUser, ref SoundStructure.WaveHdr wavhdr, int dwParam2)
+            public static void WaveOutProc(IntPtr hdrvr, int uMsg, int dwUser, ref WaveHeader wavhdr, int dwParam2)
             {
-                if (uMsg == SoundStructure.MM_WOM_DONE)
+                if (uMsg == MM_WOM_DONE)
                 {
                     GCHandle h = (GCHandle)wavhdr.dwUser;
                     SoundBuffer buf = (SoundBuffer)h.Target;
@@ -301,7 +307,7 @@ namespace TonGeneratorLibrary.Core
             {
                 playEvent.Reset();
                 playEvent.Set();
-                isPlaying = SoundStructure.waveOutWrite(hWaveOut, ref waveHeader, Marshal.SizeOf(waveHeader)) == SoundStructure.MMSYSERR_NOERROR;
+                isPlaying = WaveOutAPI.WaveOutWrite(hWaveOut, ref waveHeader, Marshal.SizeOf(waveHeader)) == MMSYSERR_NOERROR;
                 return isPlaying;
             }
 
