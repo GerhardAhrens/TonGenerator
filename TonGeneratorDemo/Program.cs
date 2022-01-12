@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using DelegateImportDLL.Core;
+
     using TonGeneratorLibrary.Core;
 
     using ValueTypeLibrary.Console;
@@ -81,6 +83,15 @@
                 sound.Play(SystemSound.Critical);
                 ConsoleMenuSmall.WriteMenu(options, options.First());
             }, ConsoleKey.D1));
+
+            options.Add(new MenueOption("Test SystemMessageBox [2]", () =>
+            {
+                uint pMsgTyp = (uint)MsgOptions.MB_OK | (uint)MsgOptions.MB_ICONASTERISK;
+                int result = SystemMessageBox.Show("MsgBox Text\nÜber ein Delegate aufgerufenen Win32 API Funktion", "Titel", pMsgTyp);
+
+
+                ConsoleMenuSmall.WriteMenu(options, options.First());
+            }, ConsoleKey.D2));
 
             ConsoleMenuSmall.Run(options, options[0]);
 

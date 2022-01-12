@@ -23,6 +23,8 @@ namespace TonGeneratorLibrary.Core
     using System.Runtime.InteropServices;
     using System.Threading;
 
+    using TonGeneratorLibrary.Core.DLLImport;
+
     public sealed class Sound : IDisposable
     {
         public int soundVolume { get; set; }
@@ -35,7 +37,8 @@ namespace TonGeneratorLibrary.Core
         private bool soundPlaying;
         private int soundFrequency;
         private Thread thread;
-        private SoundStructure.WaveDelegate bufferProc = new SoundStructure.WaveDelegate(SoundBuffer.WaveOutProc);
+        public SoundStructure.WaveDelegate bufferProc = new SoundStructure.WaveDelegate(SoundBuffer.WaveOutProc);
+        //private WaveOutAPI.WaveDelegateAPI bufferProc = new WaveOutAPI.WaveDelegateAPI(SoundBuffer.WaveOutProc);
 
         public Sound()
         {
@@ -66,7 +69,7 @@ namespace TonGeneratorLibrary.Core
             waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
             waveFormat.cbSize = 0;
 
-            if (SoundStructure.waveOutOpen(out this.mainWaveOut, 0, waveFormat, this.bufferProc, 0, SoundStructure.CALLBACK_FUNCTION) != SoundStructure.MMSYSERR_NOERROR)
+            if (WaveOutAPI.WaveOutOpen(out this.mainWaveOut, 0, waveFormat, this.bufferProc, 0, SoundStructure.CALLBACK_FUNCTION) != SoundStructure.MMSYSERR_NOERROR)
             {
                 Debug.WriteLine("Sound card cannot be opened.");
                 return false;
