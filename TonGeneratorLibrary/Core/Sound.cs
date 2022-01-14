@@ -153,6 +153,7 @@ namespace TonGeneratorLibrary.Core
             this.soundFrequency = frequency;
             this.soundVolume = volume;
             this.thread = new Thread(new ThreadStart(PlayThread));
+            this.thread.Priority = ThreadPriority.Highest;
             this.thread.Start();
         }
 
@@ -178,8 +179,8 @@ namespace TonGeneratorLibrary.Core
             playEvent.Set();
             this.FillBufferWithWave(0);
             this.FillBufferWithWave(1);
-            this.buffers[0].Play(soundFrequency);
-            this.buffers[1].Play(soundFrequency);
+            this.buffers[0].Play(this.soundFrequency);
+            this.buffers[1].Play(this.soundFrequency);
             this.currentBuffer = 2;
             while (this.soundPlaying)
             {
@@ -191,9 +192,9 @@ namespace TonGeneratorLibrary.Core
         }
 
 
-        internal sealed class SoundBuffer : IDisposable
+        private sealed class SoundBuffer : IDisposable
         {
-            private IntPtr hWaveOut;
+            private readonly IntPtr hWaveOut;
             private WaveHeader waveHeader;
             private GCHandle headerDataHandle;
             private GCHandle waveHeaderHandle;
@@ -308,6 +309,7 @@ namespace TonGeneratorLibrary.Core
                 playEvent.Reset();
                 playEvent.Set();
                 isPlaying = WaveOutAPI.WaveOutWrite(hWaveOut, ref waveHeader, Marshal.SizeOf(waveHeader)) == MMSYSERR_NOERROR;
+
                 return isPlaying;
             }
 
